@@ -169,3 +169,23 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+### IntelliJ IDEA ###
+.idea/*
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+# 预训练模型
+models/model.safetensors
+
+# 数据集
+datasets/dataset
+
+# 输出目录
+output/
+runs/
