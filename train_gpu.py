@@ -189,7 +189,7 @@ def get_args_parser():
     # 数据集参数
     arg_parser.add_argument('--data_root', default='./datasets/dataset', type=str,
                             help='数据集路径')
-    arg_parser.add_argument('--nb_classes', default=5, type=int,
+    arg_parser.add_argument('--nb_classes', default=12, type=int,
                             help='数据集分类数量')
     arg_parser.add_argument('--data-set', default='IMNET', type=str,
                             choices=['CIFAR', 'IMNET', 'INAT', 'INAT19'],

@@ -1,14 +1,14 @@
 {
-    "0": "road-good",
-    "1": "road-fair",
-    "2": "road-poor",
-    "3": "mud-good",
-    "4": "mud-fair",
-    "5": "mud-poor",
-    "6": "dirt-good",
-    "7": "dirt-fair",
-    "8": "dirt-poor",
-    "9": "gravel-good",
-    "10": "gravel-fair",
-    "11": "gravel-poor"
+    "0": "dirt-fair",
+    "1": "dirt-good",
+    "2": "dirt-poor",
+    "3": "gravel-fair",
+    "4": "gravel-good",
+    "5": "gravel-poor",
+    "6": "mud-fair",
+    "7": "mud-good",
+    "8": "mud-poor",
+    "9": "road-fair",
+    "10": "road-good",
+    "11": "road-poor"
 }
