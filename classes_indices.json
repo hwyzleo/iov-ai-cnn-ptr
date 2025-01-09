@@ -1,14 +1,7 @@
 {
-    "0": "dirt-fair",
-    "1": "dirt-good",
-    "2": "dirt-poor",
-    "3": "gravel-fair",
-    "4": "gravel-good",
-    "5": "gravel-poor",
-    "6": "mud-fair",
-    "7": "mud-good",
-    "8": "mud-poor",
-    "9": "road-fair",
-    "10": "road-good",
-    "11": "road-poor"
+    "0": "asphalt",
+    "1": "concrete",
+    "2": "gravel",
+    "3": "mud",
+    "4": "snow"
 }

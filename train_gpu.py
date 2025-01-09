@@ -43,15 +43,15 @@ from util.samplers import RASampler
 # 获取参数
 def get_args_parser():
     arg_parser = argparse.ArgumentParser('MobileNetV4训练', add_help=False)
-    arg_parser.add_argument('--batch-size', default=16, type=int,
+    arg_parser.add_argument('--batch-size', default=32, type=int,
                             help='每次训练时同时处理的图片数量，较大可以提高训练速度，更好地利用GPU并行计算能力，较小会引入更多随机性，可能有助于模型泛化')
-    arg_parser.add_argument('--epochs', default=5, type=int,
+    arg_parser.add_argument('--epochs', default=12, type=int,
                             help='训练轮数，较少容易欠拟合，较多容易过拟合')
     arg_parser.add_argument('--predict', default=True, type=bool, help='是否绘制ROC曲线和混淆矩阵')
-    arg_parser.add_argument('--opt_auc', default=False, type=bool, help='是否优化AUC指标')
+    arg_parser.add_argument('--opt-auc', default=False, type=bool, help='是否优化AUC指标')
 
     # Model parameters
-    arg_parser.add_argument('--model', default='mobilenetv4_conv_large', type=str, metavar='MODEL',
+    arg_parser.add_argument('--model', default='mobilenetv4_conv_aa_large', type=str, metavar='MODEL',
                             choices=['mobilenetv4_hybrid_large', 'mobilenetv4_hybrid_medium',
                                      'mobilenetv4_hybrid_large_075',
                                      'mobilenetv4_conv_large', 'mobilenetv4_conv_aa_large', 'mobilenetv4_conv_medium',
@@ -60,9 +60,9 @@ def get_args_parser():
                                      'mobilenetv4_conv_small_035', 'mobilenetv4_conv_small_050',
                                      'mobilenetv4_conv_blur_medium'],
                             help='模型名称')
-    arg_parser.add_argument('--extra_attention_block', default=False, type=bool,
+    arg_parser.add_argument('--extra-attention-block', default=True, type=bool,
                             help='添加额外的注意力机制模块，提升准确率，增加资源开销')
-    arg_parser.add_argument('--input-size', default=384, type=int, help='图片尺寸')
+    arg_parser.add_argument('--input-size', default=360, type=int, help='图片尺寸')
     arg_parser.add_argument('--model-ema', action='store_true',
                             help='Model Exponential Moving Average (模型指数移动平均)，通过维护训练模型参数的移动平均值来提高模型性能和稳定性')
     arg_parser.add_argument('--no-model-ema', action='store_false', dest='model_ema')
@@ -87,7 +87,7 @@ def get_args_parser():
                             help='梯度裁剪的具体方式')
     arg_parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                             help='用于 SGD（随机梯度下降）优化器，通常在 0.9-0.99 之间，默认值通常是 0.9。较大的动量值会使得模型训练更加稳定，但也可能会使得模型收敛速度变慢')
-    arg_parser.add_argument('--weight-decay', type=float, default=0.025,
+    arg_parser.add_argument('--weight-decay', type=float, default=0.02,
                             help='防止模型过拟合，范围在0.01到0.0001之间，值越大，正则化效果越强，但也可能导致模型欠拟合')
 
     # 学习率调度参数
@@ -110,7 +110,7 @@ def get_args_parser():
                             help='设置学习率的最小值，防止学习率降得过低，确保模型持续学习的能力，通常设置为初始学习率的1/100到1/1000之间')
     arg_parser.add_argument('--decay-epochs', type=float, default=30, metavar='N',
                             help='设置学习率衰减的epoch节点')
-    arg_parser.add_argument('--warmup-epochs', type=int, default=5, metavar='N',
+    arg_parser.add_argument('--warmup-epochs', type=int, default=3, metavar='N',
                             help='设置预热阶段的epochs占比，通常设置为总训练epochs的5%-10%')
     arg_parser.add_argument('--cooldown-epochs', type=int, default=10, metavar='N',
                             help='设置学习率调度器的冷却阶段长度，一般为总训练epochs的5%左右')
@@ -122,7 +122,7 @@ def get_args_parser():
     # 增强参数
     arg_parser.add_argument('--ThreeAugment', action='store_true',
                             help='当设置为True时，训练数据加载器会使用这三种数据增强方法来处理训练图像，从而增加数据的多样性，提高模型的泛化能力。')
-    arg_parser.add_argument('--color-jitter', type=float, default=0.4, metavar='PCT',
+    arg_parser.add_argument('--color-jitter', type=float, default=0.5, metavar='PCT',
                             help='用于数据增强中的颜色抖动，随机调整图像的亮度(brightness)、对比度(contrast)、饱和度(saturation)和色调(hue)')
     arg_parser.add_argument('--aa', type=str, default='rand-m9-mstd0.5-inc1', metavar='NAME',
                             help='Use AutoAugment policy. "v0" or "original". " + \
@@ -150,7 +150,7 @@ def get_args_parser():
                             help='控制随机擦除区域的分割方式，true时允许将一个大的擦除区域分割成多个小区域，false时保持每个擦除区域为单个连续区域')
 
     # 混合参数
-    arg_parser.add_argument('--mixup', type=float, default=0.8,
+    arg_parser.add_argument('--mixup', type=float, default=1.0,
                             help='随机选择两张训练图片按照一定比例进行线性混合，提高模型的泛化能力和鲁棒性')
     arg_parser.add_argument('--cutmix', type=float, default=1.0,
                             help='从一张图片中随机裁剪出一个矩形区域，将这个区域替换为另一张图片中相同位置的内容，按照裁剪区域的面积比例进行混合')
@@ -175,7 +175,7 @@ def get_args_parser():
                             help='知识蒸馏的类型')
     arg_parser.add_argument('--distillation-alpha', default=0.5, type=float,
                             help='控制原始损失和蒸馏损失的权重比例')
-    arg_parser.add_argument('--distillation-tau', default=1.0, type=float,
+    arg_parser.add_argument('--distillation-tau', default=3.0, type=float,
                             help='温度参数，用于调节软标签的"软度"')
 
     # 微调参数
@@ -183,13 +183,13 @@ def get_args_parser():
                             help='微调预训练模型，代码会从指定路径（可以是本地文件或 URL）加载预训练模型的权重')
     arg_parser.add_argument('--freeze_layers', type=bool, default=True,
                             help='为True时，预训练模型的特征提取部分会保持不变，只有分类器层的参数会被更新和优化')
-    arg_parser.add_argument('--set_bn_eval', action='store_true', default=False,
+    arg_parser.add_argument('--set-bn-eval', action='store_true', default=False,
                             help='控制批量归一化层的行为，当在小批量数据上微调大型预训练模型时，或当想保持预训练模型的特征分布特性时特别有用')
 
     # 数据集参数
-    arg_parser.add_argument('--data_root', default='./datasets/dataset', type=str,
+    arg_parser.add_argument('--data-root', default='./datasets/dataset', type=str,
                             help='数据集路径')
-    arg_parser.add_argument('--nb_classes', default=12, type=int,
+    arg_parser.add_argument('--nb-classes', default=5, type=int,
                             help='数据集分类数量')
     arg_parser.add_argument('--data-set', default='IMNET', type=str,
                             choices=['CIFAR', 'IMNET', 'INAT', 'INAT19'],
@@ -197,9 +197,9 @@ def get_args_parser():
     arg_parser.add_argument('--inat-category', default='name', type=str,
                             choices=['kingdom', 'phylum', 'class', 'order', 'supercategory', 'family', 'genus', 'name'],
                             help='semantic granularity')
-    arg_parser.add_argument('--output_dir', default='./output',
+    arg_parser.add_argument('--output-dir', default='./output',
                             help='指定输出目录的路径')
-    arg_parser.add_argument('--writer_output', default='./',
+    arg_parser.add_argument('--writer-output', default='./',
                             help='TensorBoard 日志的输出目录')
     arg_parser.add_argument('--device', type=str, default='cuda',
                             choices=['cuda', 'mps', 'cpu'],
@@ -208,13 +208,13 @@ def get_args_parser():
                             help='设置随机数种子，确保实验的可重复性')
     arg_parser.add_argument('--resume', default='',
                             help='从之前保存的检查点恢复训练')
-    arg_parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
+    arg_parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                             help='指定训练开始的轮次')
     arg_parser.add_argument('--eval', action='store_true',
                             help='用于将模型切换到评估模式')
     arg_parser.add_argument('--dist-eval', action='store_true', default=False,
                             help='启用分布式评估模式')
-    arg_parser.add_argument('--num_workers', default=0, type=int,
+    arg_parser.add_argument('--num-workers', default=0, type=int,
                             help='配置数据加载时的并行工作进程数，0 表示仅使用主进程加载数据，通常建议设置为 CPU 核心数的 2-4 倍')
     arg_parser.add_argument('--pin-mem', action='store_true',
                             help='启用内存页锁定，提高 CPU 到 GPU 的数据传输速度，减少数据加载的延迟，提升整体训练效率')
@@ -223,13 +223,13 @@ def get_args_parser():
     arg_parser.set_defaults(pin_mem=True)
 
     # 训练参数
-    arg_parser.add_argument('--world_size', default=1, type=int,
+    arg_parser.add_argument('--world-size', default=1, type=int,
                             help='指定分布式训练中的进程总数')
-    arg_parser.add_argument('--local_rank', default=0, type=int,
+    arg_parser.add_argument('--local-rank', default=0, type=int,
                             help='指定当前进程在本地机器上的进程序号')
-    arg_parser.add_argument('--dist_url', default='env://',
+    arg_parser.add_argument('--dist-url', default='env://',
                             help='指定分布式训练的URL地址')
-    arg_parser.add_argument('--save_freq', default=1, type=int,
+    arg_parser.add_argument('--save-freq', default=1, type=int,
                             help='控制模型检查点的保存频率，指定每隔多少个epoch保存一次模型检查点')
     return arg_parser
 
