@@ -43,9 +43,9 @@ from util.samplers import RASampler
 # 获取参数
 def get_args_parser():
     arg_parser = argparse.ArgumentParser('MobileNetV4训练', add_help=False)
-    arg_parser.add_argument('--batch-size', default=32, type=int,
+    arg_parser.add_argument('--batch-size', default=16, type=int,
                             help='每次训练时同时处理的图片数量，较大可以提高训练速度，更好地利用GPU并行计算能力，较小会引入更多随机性，可能有助于模型泛化')
-    arg_parser.add_argument('--epochs', default=12, type=int,
+    arg_parser.add_argument('--epochs', default=40, type=int,
                             help='训练轮数，较少容易欠拟合，较多容易过拟合')
     arg_parser.add_argument('--predict', default=True, type=bool, help='是否绘制ROC曲线和混淆矩阵')
     arg_parser.add_argument('--opt-auc', default=False, type=bool, help='是否优化AUC指标')
@@ -110,7 +110,7 @@ def get_args_parser():
                             help='设置学习率的最小值，防止学习率降得过低，确保模型持续学习的能力，通常设置为初始学习率的1/100到1/1000之间')
     arg_parser.add_argument('--decay-epochs', type=float, default=30, metavar='N',
                             help='设置学习率衰减的epoch节点')
-    arg_parser.add_argument('--warmup-epochs', type=int, default=3, metavar='N',
+    arg_parser.add_argument('--warmup-epochs', type=int, default=5, metavar='N',
                             help='设置预热阶段的epochs占比，通常设置为总训练epochs的5%-10%')
     arg_parser.add_argument('--cooldown-epochs', type=int, default=10, metavar='N',
                             help='设置学习率调度器的冷却阶段长度，一般为总训练epochs的5%左右')
@@ -120,7 +120,7 @@ def get_args_parser():
                             help='设置学习率衰减的比例，较大的衰减率（如0.1）会导致学习率急剧下降，可快速收敛；较小的衰减率（如0.5）则提供更平缓的学习过程，但可能需要更长的训练时间。')
 
     # 增强参数
-    arg_parser.add_argument('--ThreeAugment', action='store_true',
+    arg_parser.add_argument('--ThreeAugment', action='store_true', default=True,
                             help='当设置为True时，训练数据加载器会使用这三种数据增强方法来处理训练图像，从而增加数据的多样性，提高模型的泛化能力。')
     arg_parser.add_argument('--color-jitter', type=float, default=0.5, metavar='PCT',
                             help='用于数据增强中的颜色抖动，随机调整图像的亮度(brightness)、对比度(contrast)、饱和度(saturation)和色调(hue)')
@@ -139,7 +139,7 @@ def get_args_parser():
     arg_parser.set_defaults(repeated_aug=True)
 
     # 随机擦除参数
-    arg_parser.add_argument('--reprob', type=float, default=0.25, metavar='PCT',
+    arg_parser.add_argument('--reprob', type=float, default=0.3, metavar='PCT',
                             help='随机地将输入图像的某个矩形区域"擦除"，控制随机擦除数据增强的概率，值越大表示越多的训练图像会被应用随机擦除')
     arg_parser.add_argument('--remode', type=str, default='pixel',
                             choices=['pixel', 'rand', 'const'],
@@ -183,7 +183,7 @@ def get_args_parser():
                             help='微调预训练模型，代码会从指定路径（可以是本地文件或 URL）加载预训练模型的权重')
     arg_parser.add_argument('--freeze_layers', type=bool, default=True,
                             help='为True时，预训练模型的特征提取部分会保持不变，只有分类器层的参数会被更新和优化')
-    arg_parser.add_argument('--set-bn-eval', action='store_true', default=False,
+    arg_parser.add_argument('--set-bn-eval', action='store_true', default=True,
                             help='控制批量归一化层的行为，当在小批量数据上微调大型预训练模型时，或当想保持预训练模型的特征分布特性时特别有用')
 
     # 数据集参数
