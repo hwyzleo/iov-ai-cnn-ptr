@@ -185,6 +185,7 @@ models/model.safetensors
 
 # 数据集
 datasets/dataset
+datasets/validate
 
 # 输出目录
 output/

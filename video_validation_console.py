@@ -99,15 +99,15 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Video Stream Road Surface Classification')
     parser.add_argument('--model', type=str, default='mobilenetv4_conv_aa_large', help='模型名称')
-    parser.add_argument('--checkpoint_path', type=str, default='./output/mobilenetv4_conv_aa_large_best_checkpoint.pth',
+    parser.add_argument('--checkpoint-path', type=str, default='./output/mobilenetv4_conv_aa_large_best_checkpoint.pth',
                         help='训练好的模型权重文件路径')
-    parser.add_argument('--video_source', type=str, default='./test_video.mp4',
+    parser.add_argument('--video-source', type=str, default='./datasets/validate/test_video.mp4',
                         help='视频源（0为默认摄像头，或输入视频文件路径）')
-    parser.add_argument('--nb_classes', type=int, default=5, help='数据集分类数量')
-    parser.add_argument('--extra_attention_block', action='store_true', default=True, help='是否使用额外的注意力模块')
+    parser.add_argument('--nb-classes', type=int, default=5, help='数据集分类数量')
+    parser.add_argument('--extra-attention-block', action='store_true', default=True, help='是否使用额外的注意力模块')
     parser.add_argument('--finetune', type=str, default='./models/model.safetensors', help='微调模型的路径')
-    parser.add_argument('--freeze_layers', action='store_true', default=True, help='是否冻结层')
-    parser.add_argument('--set_bn_eval', action='store_true', default=True, help='是否设置BN层为eval模式')
+    parser.add_argument('--freeze-layers', action='store_true', default=True, help='是否冻结层')
+    parser.add_argument('--set-bn-eval', action='store_true', default=True, help='是否设置BN层为eval模式')
 
     args = parser.parse_args()
     main(args)

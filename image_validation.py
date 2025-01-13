@@ -70,10 +70,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Image Classification Validation')
     # 基本参数
     parser.add_argument('--model', type=str, default='mobilenetv4_conv_aa_large', help='模型名称')
-    parser.add_argument('--checkpoint_path', type=str, default='./output/mobilenetv4_conv_aa_large_best_checkpoint.pth',
+    parser.add_argument('--checkpoint-path', type=str, default='./output/mobilenetv4_conv_aa_large_best_checkpoint.pth',
                         help='训练好的模型权重文件路径')
-    parser.add_argument('--image_path', type=str, default='./test_image.png', help='要验证的图片路径')
-    parser.add_argument('--nb_classes', type=int, default=5, help='数据集分类数量')
+    parser.add_argument('--image-path', type=str, default='./datasets/validate/test_image.png', help='要验证的图片路径')
+    parser.add_argument('--nb-classes', type=int, default=5, help='数据集分类数量')
 
     # 从训练代码中添加的必要参数
     parser.add_argument('--extra-attention-block', action='store_true', default=True, help='是否使用额外的注意力模块')
