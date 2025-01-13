@@ -150,9 +150,9 @@ def get_args_parser():
                             help='控制随机擦除区域的分割方式，true时允许将一个大的擦除区域分割成多个小区域，false时保持每个擦除区域为单个连续区域')
 
     # 混合参数
-    arg_parser.add_argument('--mixup', type=float, default=1.0,
+    arg_parser.add_argument('--mixup', type=float, default=0.8,
                             help='随机选择两张训练图片按照一定比例进行线性混合，提高模型的泛化能力和鲁棒性')
-    arg_parser.add_argument('--cutmix', type=float, default=1.0,
+    arg_parser.add_argument('--cutmix', type=float, default=0.8,
                             help='从一张图片中随机裁剪出一个矩形区域，将这个区域替换为另一张图片中相同位置的内容，按照裁剪区域的面积比例进行混合')
     arg_parser.add_argument('--cutmix-minmax', type=float, nargs='+', default=None,
                             help='裁剪区域大小的范围')
@@ -181,7 +181,7 @@ def get_args_parser():
     # 微调参数
     arg_parser.add_argument('--finetune', default='./models/model.safetensors',
                             help='微调预训练模型，代码会从指定路径（可以是本地文件或 URL）加载预训练模型的权重')
-    arg_parser.add_argument('--freeze_layers', type=bool, default=True,
+    arg_parser.add_argument('--freeze-layers', type=bool, default=True,
                             help='为True时，预训练模型的特征提取部分会保持不变，只有分类器层的参数会被更新和优化')
     arg_parser.add_argument('--set-bn-eval', action='store_true', default=True,
                             help='控制批量归一化层的行为，当在小批量数据上微调大型预训练模型时，或当想保持预训练模型的特征分布特性时特别有用')
