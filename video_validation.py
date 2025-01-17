@@ -8,6 +8,7 @@ import argparse
 import time
 from models import *
 from collections import Counter
+import os
 
 
 def load_trained_model(model_name, checkpoint_path, num_classes, device, args):
@@ -25,14 +26,36 @@ def load_trained_model(model_name, checkpoint_path, num_classes, device, args):
     return model
 
 
-def preprocess_frame(frame):
+def preprocess_frame(frame, video_source):
+    # 获取frame的高度和宽度
+    height, width = frame.shape[:2]
+
+    # 定义要截取的区域（中间下方）
+    crop_height = height // 4  # 截取高度为总高度的1/4
+    crop_width = width // 18  # 截取宽度为总宽度的1/18
+
+    # 计算截取区域的坐标
+    start_x = (width - crop_width) // 2  # 水平居中
+    start_y = (height - crop_height) // 2  # 从底部往上
+
+    # 截取指定区域
+    cropped_frame = frame[start_y + crop_height*2:crop_height + crop_height*3, start_x:start_x + crop_width]
+
+    # 导出第一帧的截取区域
+    if isinstance(video_source, str):
+        video_dir = os.path.dirname(video_source)
+        video_name = os.path.splitext(os.path.basename(video_source))[0]
+        output_path = os.path.join(video_dir, f"{video_name}_first_frame_crop.jpg")
+        cv2.imwrite(output_path, cropped_frame)
+        print(f"First frame crop saved to: {output_path}")
+
     transform = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize((360, 360)),
+        transforms.Resize((360, 240)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
-    return transform(frame).unsqueeze(0)
+    return transform(cropped_frame).unsqueeze(0)
 
 
 def main(args):
@@ -53,6 +76,7 @@ def main(args):
     second_predictions = []
     class_labels = ["asphalt", "concrete", "gravel", "mud", "snow"]
     current_prediction = {"label": "", "ratio": 0, "frames": 0}
+    first_frame = True
 
     try:
         while True:
@@ -66,7 +90,12 @@ def main(args):
             # 只在每第5帧时进行处理
             if skip_counter >= frame_skip:
                 skip_counter = 0
-                processed_frame = preprocess_frame(frame)
+                if first_frame:
+                    processed_frame = preprocess_frame(frame, args.video_source)
+                    first_frame = False
+                else:
+                    processed_frame = preprocess_frame(frame, None)
+
                 processed_frame = processed_frame.to(device)
 
                 with torch.no_grad():

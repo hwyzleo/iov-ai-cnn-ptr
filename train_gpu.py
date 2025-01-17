@@ -87,14 +87,14 @@ def get_args_parser():
                             help='梯度裁剪的具体方式')
     arg_parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                             help='用于 SGD（随机梯度下降）优化器，通常在 0.9-0.99 之间，默认值通常是 0.9。较大的动量值会使得模型训练更加稳定，但也可能会使得模型收敛速度变慢')
-    arg_parser.add_argument('--weight-decay', type=float, default=0.02,
+    arg_parser.add_argument('--weight-decay', type=float, default=0.01,
                             help='防止模型过拟合，范围在0.01到0.0001之间，值越大，正则化效果越强，但也可能导致模型欠拟合')
 
     # 学习率调度参数
     arg_parser.add_argument('--sched', default='cosine', type=str, metavar='SCHEDULER',
                             choices=['cosine', 'step', 'linear'],
                             help='学习率调度器(Learning Rate Scheduler)的类型')
-    arg_parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
+    arg_parser.add_argument('--lr', type=float, default=2e-3, metavar='LR',
                             help='初始学习率，常用范围是0.001到0.1之间，较大可能导致训练不稳定或难以收敛，较小可能导致收敛速度过慢')
     arg_parser.add_argument('--adamw_lr', type=float, default=3e-3, metavar='AdamWLR',
                             help='AdamW优化器的学习率，范围在1e-4到1e-3之间')
@@ -106,11 +106,11 @@ def get_args_parser():
                             help='控制学习率噪声的标准差，值越大意味着噪声波动范围越大，通常建议将标准差设置在较小的范围内（如0.1-0.3）')
     arg_parser.add_argument('--warmup-lr', type=float, default=1e-4, metavar='LR',
                             help='预热阶段的初始学习率，通常设置得比正常学习率小一个数量级或更多，例如如果目标学习率是0.1，那么预热初始学习率可能设为0.01或0.001')
-    arg_parser.add_argument('--min-lr', type=float, default=1e-5, metavar='LR',
+    arg_parser.add_argument('--min-lr', type=float, default=2e-5, metavar='LR',
                             help='设置学习率的最小值，防止学习率降得过低，确保模型持续学习的能力，通常设置为初始学习率的1/100到1/1000之间')
     arg_parser.add_argument('--decay-epochs', type=float, default=30, metavar='N',
                             help='设置学习率衰减的epoch节点')
-    arg_parser.add_argument('--warmup-epochs', type=int, default=5, metavar='N',
+    arg_parser.add_argument('--warmup-epochs', type=int, default=8, metavar='N',
                             help='设置预热阶段的epochs占比，通常设置为总训练epochs的5%-10%')
     arg_parser.add_argument('--cooldown-epochs', type=int, default=10, metavar='N',
                             help='设置学习率调度器的冷却阶段长度，一般为总训练epochs的5%左右')
@@ -127,7 +127,7 @@ def get_args_parser():
     arg_parser.add_argument('--aa', type=str, default='rand-m9-mstd0.5-inc1', metavar='NAME',
                             help='Use AutoAugment policy. "v0" or "original". " + \
                              "(default: rand-m9-mstd0.5-inc1)'),
-    arg_parser.add_argument('--smoothing', type=float, default=0.1,
+    arg_parser.add_argument('--smoothing', type=float, default=0.15,
                             help='通过将原始的one-hot标签转换为软标签来防止模型过度自信，提高泛化能力')
     arg_parser.add_argument('--train-interpolation', type=str, default='bicubic',
                             choices=['bilinear', 'bicubic', 'nearest'],
@@ -150,9 +150,9 @@ def get_args_parser():
                             help='控制随机擦除区域的分割方式，true时允许将一个大的擦除区域分割成多个小区域，false时保持每个擦除区域为单个连续区域')
 
     # 混合参数
-    arg_parser.add_argument('--mixup', type=float, default=0.8,
+    arg_parser.add_argument('--mixup', type=float, default=1.0,
                             help='随机选择两张训练图片按照一定比例进行线性混合，提高模型的泛化能力和鲁棒性')
-    arg_parser.add_argument('--cutmix', type=float, default=0.8,
+    arg_parser.add_argument('--cutmix', type=float, default=1.0,
                             help='从一张图片中随机裁剪出一个矩形区域，将这个区域替换为另一张图片中相同位置的内容，按照裁剪区域的面积比例进行混合')
     arg_parser.add_argument('--cutmix-minmax', type=float, nargs='+', default=None,
                             help='裁剪区域大小的范围')
