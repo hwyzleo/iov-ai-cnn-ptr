@@ -45,7 +45,7 @@ def get_args_parser():
     arg_parser = argparse.ArgumentParser('MobileNetV4训练', add_help=False)
     arg_parser.add_argument('--batch-size', default=16, type=int,
                             help='每次训练时同时处理的图片数量，较大可以提高训练速度，更好地利用GPU并行计算能力，较小会引入更多随机性，可能有助于模型泛化')
-    arg_parser.add_argument('--epochs', default=40, type=int,
+    arg_parser.add_argument('--epochs', default=50, type=int,
                             help='训练轮数，较少容易欠拟合，较多容易过拟合')
     arg_parser.add_argument('--predict', default=True, type=bool, help='是否绘制ROC曲线和混淆矩阵')
     arg_parser.add_argument('--opt-auc', default=False, type=bool, help='是否优化AUC指标')
@@ -94,7 +94,7 @@ def get_args_parser():
     arg_parser.add_argument('--sched', default='cosine', type=str, metavar='SCHEDULER',
                             choices=['cosine', 'step', 'linear'],
                             help='学习率调度器(Learning Rate Scheduler)的类型')
-    arg_parser.add_argument('--lr', type=float, default=2e-3, metavar='LR',
+    arg_parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
                             help='初始学习率，常用范围是0.001到0.1之间，较大可能导致训练不稳定或难以收敛，较小可能导致收敛速度过慢')
     arg_parser.add_argument('--adamw_lr', type=float, default=3e-3, metavar='AdamWLR',
                             help='AdamW优化器的学习率，范围在1e-4到1e-3之间')
@@ -106,7 +106,7 @@ def get_args_parser():
                             help='控制学习率噪声的标准差，值越大意味着噪声波动范围越大，通常建议将标准差设置在较小的范围内（如0.1-0.3）')
     arg_parser.add_argument('--warmup-lr', type=float, default=1e-4, metavar='LR',
                             help='预热阶段的初始学习率，通常设置得比正常学习率小一个数量级或更多，例如如果目标学习率是0.1，那么预热初始学习率可能设为0.01或0.001')
-    arg_parser.add_argument('--min-lr', type=float, default=2e-5, metavar='LR',
+    arg_parser.add_argument('--min-lr', type=float, default=1e-5, metavar='LR',
                             help='设置学习率的最小值，防止学习率降得过低，确保模型持续学习的能力，通常设置为初始学习率的1/100到1/1000之间')
     arg_parser.add_argument('--decay-epochs', type=float, default=30, metavar='N',
                             help='设置学习率衰减的epoch节点')
@@ -127,7 +127,7 @@ def get_args_parser():
     arg_parser.add_argument('--aa', type=str, default='rand-m9-mstd0.5-inc1', metavar='NAME',
                             help='Use AutoAugment policy. "v0" or "original". " + \
                              "(default: rand-m9-mstd0.5-inc1)'),
-    arg_parser.add_argument('--smoothing', type=float, default=0.15,
+    arg_parser.add_argument('--smoothing', type=float, default=0.1,
                             help='通过将原始的one-hot标签转换为软标签来防止模型过度自信，提高泛化能力')
     arg_parser.add_argument('--train-interpolation', type=str, default='bicubic',
                             choices=['bilinear', 'bicubic', 'nearest'],
