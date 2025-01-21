@@ -9,8 +9,10 @@ from models import *
 from collections import Counter
 import cv2
 import os
+from camera_manager import CameraManager, NvSIPLCameraConfig
 
 
+# 加载训练模型
 def load_trained_model(model_name, checkpoint_path, num_classes, device, args):
     model = create_model(
         model_name,
@@ -26,6 +28,7 @@ def load_trained_model(model_name, checkpoint_path, num_classes, device, args):
     return model
 
 
+# 处理视频帧
 def preprocess_frame(frame, video_source):
     # 获取frame的高度和宽度
     height, width = frame.shape[:2]
@@ -58,15 +61,16 @@ def preprocess_frame(frame, video_source):
     return transform(cropped_frame).unsqueeze(0)
 
 
+# 主程序
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = load_trained_model(args.model, args.checkpoint_path, args.nb_classes, device, args)
 
     if args.video_source.isdigit():
-        video_source = int(args.video_source)
+        # 使用NVIDIA SIPL相机
+        cap = CameraManager()
     else:
-        video_source = args.video_source
-    cap = cv2.VideoCapture(video_source)
+        cap = cv2.VideoCapture(args.video_source)
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_time = 1 / fps if fps > 0 else 0.033
@@ -81,7 +85,7 @@ def main(args):
 
     try:
         while True:
-            ret, frame = cap.read()
+            ret, frame = cap.get_frame() if isinstance(cap, CameraManager) else cap.read()
             if not ret:
                 break
 
@@ -122,7 +126,7 @@ def main(args):
                 last_time = current_time
 
     finally:
-        cap.release()
+        cap.release() if isinstance(cap, CameraManager) else cap.release()
 
 
 if __name__ == "__main__":
