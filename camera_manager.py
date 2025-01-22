@@ -1,10 +1,12 @@
 import ctypes
 import cv2
 import numpy as np
-import os
 
 # 加载SIPL库
-sipl_lib = ctypes.CDLL('libNvSIPLCamera.so')
+try:
+    sipl_lib = ctypes.CDLL('libNvSIPLCamera.so')
+except OSError:
+    sipl_lib = None
 
 
 # 定义摄像头配置结构体
@@ -35,13 +37,19 @@ class NvSIPLCameraConfig(ctypes.Structure):
 # 摄像头管理类
 class CameraManager:
     def __init__(self):
-        self.camera_handle = self.init_camera()
-        self.camera_config = NvSIPLCameraConfig()
-        self.configure_camera()
-        self.start_capture()
+        if sipl_lib is not None:
+            self.camera_handle = self.init_camera()
+            self.camera_config = NvSIPLCameraConfig()
+            self.configure_camera()
+            self.start_capture()
+        else:
+            self.camera_handle = None
+            self.camera_config = None
 
     @staticmethod
     def init_camera():
+        if sipl_lib is None:
+            return None
         camera_handle = ctypes.c_void_p()
         status = sipl_lib.NvSIPLCameraCreate(ctypes.byref(camera_handle))
         if status != 0:
@@ -49,17 +57,23 @@ class CameraManager:
         return camera_handle
 
     def configure_camera(self):
+        if sipl_lib is None:
+            return
         config = NvSIPLCameraConfig()
         status = sipl_lib.NvSIPLCameraSetConfig(self.camera_handle, ctypes.byref(config))
         if status != 0:
             raise Exception("Failed to configure camera")
 
     def start_capture(self):
+        if sipl_lib is None:
+            return
         status = sipl_lib.NvSIPLCameraStartCapture(self.camera_handle)
         if status != 0:
             raise Exception("Failed to start capture")
 
     def get_frame(self):
+        if sipl_lib is None:
+            return False, None
         try:
             frame_data = ctypes.c_void_p()
             status = sipl_lib.NvSIPLCameraGetFrame(self.camera_handle, ctypes.byref(frame_data))
@@ -77,5 +91,7 @@ class CameraManager:
         return 0
 
     def release(self):
+        if sipl_lib is None:
+            return
         sipl_lib.NvSIPLCameraStopCapture(self.camera_handle)
         sipl_lib.NvSIPLCameraDestroy(self.camera_handle)

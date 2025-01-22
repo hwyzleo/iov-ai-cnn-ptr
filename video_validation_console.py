@@ -1,15 +1,13 @@
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
-import numpy as np
-from timm.models import create_model
 import argparse
-import time
-from models import *
-from collections import Counter
-import cv2
 import os
-from camera_manager import CameraManager, NvSIPLCameraConfig
+import time
+import cv2
+from models import *
+from timm.models import create_model
+from collections import Counter, deque
+from camera_manager import CameraManager
 
 
 # 加载训练模型
@@ -34,15 +32,15 @@ def preprocess_frame(frame, video_source):
     height, width = frame.shape[:2]
 
     # 定义要截取的区域（中间下方）
-    crop_height = height // 4  # 截取高度为总高度的1/4
-    crop_width = width // 18  # 截取宽度为总宽度的1/18
+    crop_height = height // 3  # 截取高度为总高度的1/3
+    crop_width = width // 13  # 截取宽度为总宽度的1/13
 
     # 计算截取区域的坐标
     start_x = (width - crop_width) // 2  # 水平居中
     start_y = (height - crop_height) // 2  # 从底部往上
 
     # 截取指定区域
-    cropped_frame = frame[start_y + crop_height*2:crop_height + crop_height*3, start_x:start_x + crop_width]
+    cropped_frame = frame[start_y + 150:start_y + crop_height + 10, start_x:start_x + crop_width]
 
     # 导出第一帧的截取区域
     if isinstance(video_source, str):
@@ -54,7 +52,7 @@ def preprocess_frame(frame, video_source):
 
     transform = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize((360, 240)),
+        transforms.Resize((220, 150)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
@@ -73,11 +71,12 @@ def main(args):
         cap = cv2.VideoCapture(args.video_source)
 
     fps = cap.get(cv2.CAP_PROP_FPS)
+    print(f"FPS: {fps}")
     frame_time = 1 / fps if fps > 0 else 0.033
     frame_count = 0
-    frame_skip = 5  # 每5帧处理一次
+    frame_skip = 3  # 每5帧处理一次
     skip_counter = 0
-    second_predictions = []
+    second_predictions = deque(maxlen=10)
     class_labels = ["asphalt", "concrete", "gravel", "mud", "snow"]
     current_second = 0
     last_time = time.time()
@@ -106,6 +105,7 @@ def main(args):
                     confidence, predicted_class = torch.max(probabilities, 1)
 
                 second_predictions.append(predicted_class.item())
+                print(f"Frame {len(second_predictions)},{second_predictions}")
                 frame_count += 1
 
             if frame_count >= fps // frame_skip:
@@ -122,7 +122,6 @@ def main(args):
                     f"Second {current_second}: {most_common_label} ({prediction_ratio:.2f}%) - Processing time: {processing_time:.3f}s")
 
                 frame_count = 0
-                second_predictions = []
                 last_time = current_time
 
     finally:
