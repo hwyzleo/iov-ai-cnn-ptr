@@ -259,7 +259,7 @@ class MobileNetV4(nn.Module):
             x = checkpoint_seq(self.blocks, x, flatten=True)
         else:
             x = self.blocks(x)
-        if self.extra_attention_block:
+        if hasattr(self, 'extra_attention_block') and self.extra_attention_block is not None:
             x = self.extra_attention_block(x)
         return x
 
@@ -536,6 +536,8 @@ def _gen_mobilenet_v4(
                     'uir_r3_a3_k3_s1_e4_c192',  # ExtraDW
                     'uir_r1_a3_k5_s1_e4_c192',  # ExtraDW
                     'uir_r2_a5_k3_s1_e4_c192',  # ExtraDW
+                    'mqa_r1_k3_h8_s1_v2_d48_c192',  # MQA w/ KV downsample
+                    'uir_r1_a5_k3_s1_e4_c192',  # ExtraDW
                     'mqa_r1_k3_h8_s1_v2_d48_c192',  # MQA w/ KV downsample
                     'uir_r1_a5_k3_s1_e4_c192',  # ExtraDW
                     'mqa_r1_k3_h8_s1_v2_d48_c192',  # MQA w/ KV downsample
@@ -835,88 +837,80 @@ def register_if_not_exists(fn):
     return fn
 
 @register_model
-def mobilenetv4_conv_small_035(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_conv_small_035(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 """
     model = _gen_mobilenet_v4('mobilenetv4_conv_small_035', 0.35, pretrained=pretrained, **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_conv_small_050(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_conv_small_050(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 """
     model = _gen_mobilenet_v4('mobilenetv4_conv_small_050', 0.50, pretrained=pretrained, **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_conv_small(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_conv_small(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 """
     model = _gen_mobilenet_v4('mobilenetv4_conv_small', 1.0, pretrained=pretrained, **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_conv_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_conv_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 """
     model = _gen_mobilenet_v4('mobilenetv4_conv_medium', 1.0, pretrained=pretrained, **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_conv_large(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_conv_large(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 """
     model = _gen_mobilenet_v4('mobilenetv4_conv_large', 1.0, pretrained=pretrained, **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_hybrid_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
-    """ MobileNet V4 Hybrid """
+def custom_mobilenetv4_hybrid_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+    """ MobileNet V4 Hybrid"""
     model = _gen_mobilenet_v4('mobilenetv4_hybrid_medium', 1.0, pretrained=pretrained, **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_hybrid_large(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
-    """ MobileNet V4 Hybrid"""
-    model = _gen_mobilenet_v4('mobilenetv4_hybrid_large', 1.0, pretrained=pretrained, **kwargs)
-    return model
-
-
-@register_model
-def mobilenetv4_conv_aa_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_conv_aa_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 w/ AvgPool AA """
     model = _gen_mobilenet_v4('mobilenetv4_conv_aa_medium', 1.0, pretrained=pretrained, aa_layer='avg', **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_conv_blur_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
-    """ MobileNet V4 Conv w/ Blur AA """
-    model = _gen_mobilenet_v4('mobilenetv4_conv_blur_medium', 1.0, pretrained=pretrained, aa_layer='blurpc', **kwargs)
+def custom_mobilenetv4_conv_blur_medium(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+    """ MobileNet V4 w/ Blur Pool """
+    model = _gen_mobilenet_v4('mobilenetv4_conv_blur_medium', 1.0, pretrained=pretrained, aa_layer='blur', **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_conv_aa_large(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
-    """ MobileNet V4 w/ AvgPool AA """
-    model = _gen_mobilenet_v4('mobilenetv4_conv_aa_large', 1.0, pretrained=pretrained, aa_layer='avg', **kwargs)
-    return model
-
-
-@register_model
-def mobilenetv4_hybrid_medium_075(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_hybrid_medium_075(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 Hybrid """
     model = _gen_mobilenet_v4('mobilenetv4_hybrid_medium_075', 0.75, pretrained=pretrained, **kwargs)
     return model
 
 
 @register_model
-def mobilenetv4_hybrid_large_075(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+def custom_mobilenetv4_hybrid_large_075(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
     """ MobileNet V4 Hybrid"""
     model = _gen_mobilenet_v4('mobilenetv4_hybrid_large_075', 0.75, pretrained=pretrained, **kwargs)
     return model
 
+
+@register_model
+def custom_mobilenetv4_conv_aa_large(pretrained=False, pretrained_cfg=None, pretrained_cfg_overlay=None, **kwargs) -> MobileNetV4:
+    """ MobileNet V4 w/ AvgPool AA """
+    model = _gen_mobilenet_v4('mobilenetv4_conv_aa_large', 1.0, pretrained=pretrained, aa_layer='avg', **kwargs)
+    return model
 
 # if __name__ == '__main__':
 #     from torchinfo import summary
